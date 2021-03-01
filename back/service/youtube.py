@@ -1,4 +1,4 @@
-from flask import request, abort
+from flask import request, make_response
 from pytube import YouTube
 from pytube.exceptions import PytubeError, RegexMatchError, VideoUnavailable
 from http import HTTPStatus
@@ -12,13 +12,13 @@ def info():
         youtube_video = YouTube(youtube_link)
 
     except KeyError:
-        abort(HTTPStatus.BAD_REQUEST, 'Missing YouTube link')
+        return make_response('Missing YouTube link', HTTPStatus.BAD_REQUEST)
     
     except RegexMatchError:
-        abort(HTTPStatus.BAD_REQUEST, 'Ill formed YouTube link')
+        return make_response('Ill formed YouTube link', HTTPStatus.BAD_REQUEST)
 
     except VideoUnavailable:
-        abort(HTTPStatus.BAD_REQUEST, 'YouTube video unavailable')
+        return make_response('YouTube video unavailable', HTTPStatus.BAD_REQUEST)
 
     metadata = youtube_video.metadata.metadata
 
@@ -28,11 +28,11 @@ def info():
         else metadata[0]
     )
 
-    return {
+    return make_response({
         'title': youtube_video.title,
         'author': youtube_video.author,
         'description': youtube_video.description,
         'views': youtube_video.views,
         'thumbnail': youtube_video.thumbnail_url,
         'music': music_data
-    }, HTTPStatus.OK
+    }, HTTPStatus.OK)

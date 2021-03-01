@@ -1,4 +1,4 @@
-from flask import  Blueprint, abort
+from flask import  Blueprint, make_response
 from http import HTTPStatus
 import os
 
@@ -11,7 +11,7 @@ api = Blueprint('api', __name__, url_prefix = '/api')
 def root():
     """ Root URL response """
 
-    return {}, HTTPStatus.OK
+    return make_response({}, HTTPStatus.OK)
 
 
 api.add_url_rule('/info', view_func = youtube.info, methods = ['GET'])
