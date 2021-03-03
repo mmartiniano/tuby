@@ -1,0 +1,7 @@
+### root
+
+http://localhost:5000/api/
+
+### video info
+
+http://localhost:5000/api/info?v=https://www.youtube.com/watch?v=JtH68PJIQLE

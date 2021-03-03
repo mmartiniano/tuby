@@ -21,8 +21,14 @@ def info():
         return make_response('YouTube video unavailable', HTTPStatus.BAD_REQUEST)
 
     streams = {
-        'complete': youtube_video.streams.first(),
-        'audio': youtube_video.streams.get_audio_only()
+        'all': [
+            stream_data(stream)
+            for stream in
+            youtube_video.streams.filter(progressive = True).order_by('resolution').desc()
+        ],
+        'audio': stream_data(
+            youtube_video.streams.get_audio_only()
+        ) 
     }
 
     metadata = youtube_video.metadata.metadata
@@ -34,7 +40,7 @@ def info():
         'views': youtube_video.views,
         'thumbnail': youtube_video.thumbnail_url,
         'length': youtube_video.length,
-        'streams': { key: stream_data(value) for key, value in streams.items() },
+        'streams': streams,
         'music': music_data(metadata)
     }
 
@@ -56,6 +62,7 @@ def music_data(metadata):
 
 def stream_data(stream):
     return {
+        'id': stream.itag,
         'resolution': stream.resolution,
         'size': stream.filesize
     }
