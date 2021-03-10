@@ -4,3 +4,4 @@ venv/
 
 # custom files
 ignore.txt
+storage/

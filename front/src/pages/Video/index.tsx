@@ -44,6 +44,7 @@ const Video: React.FC<RouteComponentProps> = ({ history }) => {
                         <Card.Title> Music </Card.Title>
                         <p><strong>Song: </strong>{music.song}</p>
                         <p><strong>Artist: </strong>{music.artist || ''}</p>
+                        <p><strong>Album: </strong>{music.album}</p>
                         <Button style={{fontSize: '1.1rem'}}> Download as music ({byteToMega(video!.streams!.audio.size)}) </Button>
                     </Card>
                 )}

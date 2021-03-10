@@ -1,21 +1,36 @@
+import os
+from shutil import rmtree
 from flask import request, make_response
 from pytube import YouTube
 from pytube.exceptions import PytubeError, RegexMatchError, VideoUnavailable
 from http import HTTPStatus
+from uuid import uuid4
+
+from util import data
+from alias import Request, Resource
+
+
+STORAGE_DIRECTORY = 'storage'
+
+if not os.path.exists(STORAGE_DIRECTORY):
+    os.makedirs(STORAGE_DIRECTORY)
+
+else:
+    rmtree(STORAGE_DIRECTORY)
 
 
 def info():
     """ Get YouTube video info """
 
     try:
-        youtube_link = request.args['v']
+        youtube_link = request.args[Request.LINK.value]
         youtube_video = YouTube(youtube_link)
 
     except KeyError:
         return make_response('Missing YouTube link', HTTPStatus.BAD_REQUEST)
     
     except RegexMatchError:
-        return make_response('Ill formed YouTube link', HTTPStatus.BAD_REQUEST)
+        return make_response('Bad YouTube link', HTTPStatus.BAD_REQUEST)
 
     except VideoUnavailable:
         return make_response('YouTube video unavailable', HTTPStatus.BAD_REQUEST)
@@ -34,28 +49,40 @@ def info():
         'views': youtube_video.views,
         'thumbnail': youtube_video.thumbnail_url,
         'length': youtube_video.length,
-        'streams': { key: stream_data(value) for key, value in streams.items() },
-        'music': music_data(metadata)
+        'streams': { key: data.stream_data(value) for key, value in streams.items() },
+        'music': data.music_data(metadata)
     }
 
     return make_response(video, HTTPStatus.OK)
 
 
-def music_data(metadata):
-    music_fields = ('Song', 'Album', 'Artist')
+def mount():
+    """ Download YouTube resource to server """
 
-    return (
-        {}
-        if not metadata or not metadata[0].get('Song')
-        else {
-            key.lower(): value for key, value in metadata[0].items()
-            if key in music_fields
-        }
-    )
+    id = uuid4()
+    storage = STORAGE_DIRECTORY + '/' + str(id)
 
+    if not os.path.exists(storage):
+        os.makedirs(storage)
 
-def stream_data(stream):
-    return {
-        'resolution': stream.resolution,
-        'size': stream.filesize
-    }
+    try:
+        youtube_link = request.args[Request.LINK.value]
+        youtube_video = YouTube(youtube_link)
+
+        resource = request.args[Request.RESOURCE.value]
+
+        if resource is Resource.AUDIO:
+            stream = youtube_video.streams.get_audio_only()
+
+        else:
+            stream = youtube_video.streams.first()
+
+        output = stream.download(
+            output_path = storage,
+            filename = youtube_video.title
+        )
+
+        return make_response({'resource': output}, HTTPStatus.CREATED)
+
+    except (KeyError, PytubeError):
+        return make_response('Bad YouTube resource', HTTPStatus.BAD_REQUEST)
