@@ -1,12 +1,13 @@
 from enum import Enum
 
 
-class Request(Enum):
+class Request(str, Enum):
     LINK = 'l'
     RESOURCE = 'r'
+    TICKET = 't'
 
 
-class Resource(Enum):
+class Resource(str, Enum):
     VIDEO = 'v'
     AUDIO = 'a'
     MUSIC = 'm'

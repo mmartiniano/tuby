@@ -1,6 +1,6 @@
 import os
 from shutil import rmtree
-from flask import request, make_response
+from flask import request, make_response, send_from_directory
 from pytube import YouTube
 from pytube.exceptions import PytubeError, RegexMatchError, VideoUnavailable
 from http import HTTPStatus
@@ -23,7 +23,7 @@ def info():
     """ Get YouTube video info """
 
     try:
-        youtube_link = request.args[Request.LINK.value]
+        youtube_link = request.args[Request.LINK]
         youtube_video = YouTube(youtube_link)
 
     except KeyError:
@@ -43,14 +43,15 @@ def info():
     metadata = youtube_video.metadata.metadata
 
     video = {
+        'link': youtube_link,
         'title': youtube_video.title,
         'author': youtube_video.author,
         'description': youtube_video.description,
         'views': youtube_video.views,
         'thumbnail': youtube_video.thumbnail_url,
         'length': youtube_video.length,
-        'streams': { key: data.stream_data(value) for key, value in streams.items() },
-        'music': data.music_data(metadata)
+        'streams': { key: data.stream(value) for key, value in streams.items() },
+        'music': data.music(metadata)
     }
 
     return make_response(video, HTTPStatus.OK)
@@ -59,30 +60,59 @@ def info():
 def mount():
     """ Download YouTube resource to server """
 
-    id = uuid4()
-    storage = STORAGE_DIRECTORY + '/' + str(id)
+    id = str(uuid4())
+    storage = os.path.join(STORAGE_DIRECTORY, id)
 
     if not os.path.exists(storage):
         os.makedirs(storage)
 
     try:
-        youtube_link = request.args[Request.LINK.value]
+        youtube_link = request.args[Request.LINK]
         youtube_video = YouTube(youtube_link)
 
-        resource = request.args[Request.RESOURCE.value]
+        resource = request.args[Request.RESOURCE]
 
-        if resource is Resource.AUDIO:
+        if resource == Resource.AUDIO:
             stream = youtube_video.streams.get_audio_only()
 
-        else:
+        elif resource == Resource.VIDEO:
             stream = youtube_video.streams.first()
 
-        output = stream.download(
-            output_path = storage,
-            filename = youtube_video.title
-        )
+        else:
+            return make_response('Bad resource type', HTTPStatus.BAD_REQUEST)
 
-        return make_response({'resource': output}, HTTPStatus.CREATED)
+        stream.download(output_path = storage, filename = youtube_video.title)
+
+        return make_response(id, HTTPStatus.CREATED)
 
     except (KeyError, PytubeError):
         return make_response('Bad YouTube resource', HTTPStatus.BAD_REQUEST)
+
+
+def download():
+    """ Download YouTube resource to client """
+
+    ticket = request.args[Request.TICKET]
+    storage = os.path.join(STORAGE_DIRECTORY, ticket)
+
+    _, _, files = next(os.walk(storage))
+
+    if not len(files) > 0:
+        return make_response('Ticket not found or expired', HTTPStatus.NOT_FOUND)
+
+    response = send_from_directory(storage, files[0], as_attachment = True)
+    response.headers['x-suggested-filename'] = files[0]
+    return response
+
+
+def delete():
+    """ Delete resource from server """
+
+    ticket = request.args[Request.TICKET]
+    storage = os.path.join(STORAGE_DIRECTORY, ticket)
+
+    if not os.path.exists(storage):
+        make_response('Ticket not found', HTTPStatus.NOT_FOUND)
+
+    rmtree(storage)
+    make_response({}, 200)

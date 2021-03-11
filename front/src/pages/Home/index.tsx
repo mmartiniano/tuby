@@ -21,6 +21,9 @@ const Home: React.FC<RouteComponentProps> = ({ history }) => {
     }
 
     const handleSubmit = () => {
+        if (! link)
+            return
+            
         YouTubeService.search(link)
         .then( response => {
             if (context) {

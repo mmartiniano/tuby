@@ -6,6 +6,14 @@ http://localhost:5000/api/
 
 http://localhost:5000/api/info?l=https://www.youtube.com/watch?v=JtH68PJIQLE
 
-### mount resource
+### mount video resource
 
-http://localhost:5000/api/mount?r=v&l=https://www.youtube.com/watch?v=JtH68PJIQLE
+http://localhost:5000/api/mount?l=https://www.youtube.com/watch?v=JtH68PJIQLE&r=v
+
+### mount audio resource
+
+http://localhost:5000/api/mount?l=https://www.youtube.com/watch?v=JtH68PJIQLE&r=a
+
+### download ticket resource
+
+http://localhost:5000/api/download?t=818e1cf9-b253-4a87-941d-bc066f645a85

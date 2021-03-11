@@ -1,4 +1,5 @@
 export interface IVideo {
+    link?: string,
     title?: string,
     author?: string,
     length?: number,

@@ -16,3 +16,4 @@ def root():
 
 api.add_url_rule('/info', view_func = youtube.info, methods = ['GET'])
 api.add_url_rule('/mount', view_func = youtube.mount, methods = ['GET'])
+api.add_url_rule('/download', view_func = youtube.download, methods = ['GET'])
