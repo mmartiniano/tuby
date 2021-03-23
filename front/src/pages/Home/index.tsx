@@ -15,14 +15,30 @@ const Home: React.FC<RouteComponentProps> = ({ history }) => {
 
     const [msg, setMsg] = useState<string>();
     const [link, setLink] = useState<string>('');
+    const [loading, setLoading] = useState<boolean>(false);
 
     const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
         setLink(event.target.value);
     }
 
+    const displayLoader = (visible: boolean) => {
+        context?.dispatch({ 
+            type: ActionType.LOAD,
+            payload: {
+                ...context.state,
+                loading: visible
+            }
+        })
+    }
+
     const handleSubmit = () => {
-        if (! link)
-            return
+        if (! link) {
+            setMsg('Please type a YouTube video link');
+            return;
+        }
+
+        setLoading(true);
+        displayLoader(true);
             
         YouTubeService.search(link)
         .then( response => {
@@ -40,6 +56,9 @@ const Home: React.FC<RouteComponentProps> = ({ history }) => {
         .catch( error => {
             setMsg(error.response ? error.response.data : 'Failed to connect');
         })
+        .then( () => {
+            displayLoader(false);
+        })
     }
 
     return (
@@ -50,7 +69,7 @@ const Home: React.FC<RouteComponentProps> = ({ history }) => {
 
             <Input name="link" autoFocus onChange={handleChange} value='' placeholder="Insert a YouTube video link"/>
 
-            <Button onClick={handleSubmit}>Search</Button>
+            <Button onClick={handleSubmit} loading={loading} loading_text="Searching...">Search</Button>
         </Content>
     )
 }

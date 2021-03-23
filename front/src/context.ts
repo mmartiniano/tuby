@@ -11,7 +11,7 @@ interface State {
 export enum ActionType {
     WRITE = 'WRITE',
     CLEAR = 'CLEAR',
-    LOAD = 'LOAD'
+    LOAD = 'LOAD',
 }
 
 interface Action {
@@ -42,7 +42,7 @@ export const reducer = (state: State, action: Action): State => {
         case ActionType.LOAD:
             return {
                 ...state,
-                loading: true
+                loading: payload.loading
             };
 
         default:

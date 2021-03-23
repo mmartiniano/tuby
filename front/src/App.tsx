@@ -9,6 +9,7 @@ import dark from './styles/themes/dark';
 import GlobalStyle from './styles/global';
 import Header from './components/Header';
 import Main from './components/Main';
+import Loader from './components/Loader';
 
 
 const App = () => {
@@ -24,6 +25,7 @@ const App = () => {
       <GlobalStyle/>
 
       <Context.Provider value={{state, dispatch}}>
+        <Loader/>
         <Header toggleTheme={toggleTheme}/>
 
         <Main>

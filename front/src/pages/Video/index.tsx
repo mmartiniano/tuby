@@ -29,11 +29,10 @@ const Video: React.FC<RouteComponentProps> = ({ history }) => {
         YouTubeService.download(video!.link!, resource)
         .then( response => {
             setMsg('');
-            const url = window.URL.createObjectURL(response.data);
 
             const link = document.createElement('a');
-            link.href = url;
-            link.download = response.headers['x-suggested-filename']
+            link.href = window.URL.createObjectURL(response.data);
+            link.download = response.headers['x-suggested-filename'];
             link.click();
         })
         .catch( () => {

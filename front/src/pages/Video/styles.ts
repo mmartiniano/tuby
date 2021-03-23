@@ -30,6 +30,8 @@ export const VideoAuthor = styled.p`
 `;
 
 export const Left = styled.div`
+    margin-top: 3.5rem;
+
     @media only screen and (min-width: 992px) {
         & {
             width: 45%;
@@ -37,6 +39,7 @@ export const Left = styled.div`
             height: calc(100vh - 3.5rem);
             left: 0;
             top: 3.5rem;
+            margin-top: 0;
             display: flex;
             justify-content: center;
             flex-direction: column;
