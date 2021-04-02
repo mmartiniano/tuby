@@ -9,8 +9,7 @@ export const Container = styled.div`
 	z-index: 1000;
 	animation: preloader 1.2s linear infinite;
     background-color: ${props => props.theme.color.unselected};
-    border-radius: ${props => props.theme.radius};
-
+    border-radius: 50%;
 
     @keyframes preloader {
         0% {

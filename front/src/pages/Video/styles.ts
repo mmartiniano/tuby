@@ -51,9 +51,9 @@ export const Left = styled.div`
 export const Right = styled.div`
     @media only screen and (min-width: 992px) {
         & {
-            width: 55%;
-            padding: 0 5rem;
-            margin-left: 45%
+            width: 45%;
+            padding: 2rem 5rem;
+            margin-left: 50%;
         }
     }
 `;

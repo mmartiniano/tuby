@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 export const Container = styled.div`
     margin-top: 2rem;
@@ -17,16 +17,17 @@ export const StyledButton = styled.button`
 	border: .15rem solid ${props => props.theme.color.secondary};
 	border-radius: ${props => props.theme.radius};
 	font-weight: bold !important;
-	cursor: pointer;
 	transition: all 0.2s ease-in-out;
 
-    /* Button focus */
     &:active {
         opacity: 0.6;
     }
 
 	&:hover {
-		background-color: ${props => props.theme.color.secondary};
-		color: ${props => props.theme.color.primary};
+		${props => !props.disabled && css`
+			background-color: ${props => props.theme.color.secondary};
+			color: ${props => props.theme.color.primary};
+			cursor: pointer;
+		`};
 	}
 `;

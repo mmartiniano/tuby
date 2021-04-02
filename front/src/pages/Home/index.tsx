@@ -37,6 +37,7 @@ const Home: React.FC<RouteComponentProps> = ({ history }) => {
             return;
         }
 
+        setMsg('');
         setLoading(true);
         displayLoader(true);
             
@@ -58,6 +59,7 @@ const Home: React.FC<RouteComponentProps> = ({ history }) => {
         })
         .then( () => {
             displayLoader(false);
+            setLoading(false);
         })
     }
 

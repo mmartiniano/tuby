@@ -8,7 +8,7 @@ export const Container = styled.div`
     font-size: .9rem;
 
     & + & {
-        margin-top: 1rem;
+        margin-top: 1.5rem;
     }
 `;
 
