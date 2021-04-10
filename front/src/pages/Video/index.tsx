@@ -21,10 +21,12 @@ const DownloadButton: React.FC<ButtonProps> = props => (
 
 const Video: React.FC<RouteComponentProps> = ({ history }) => {
     const context = useContext(Context);
-    const video = (context?.state || {}).video;
+    const video = context?.state.video || {};
+    console.log(video)
 
-    if (! video)
+    if (Object.keys(video).length === 0) {
         history.push('/');
+    }
 
     const [msg, setMsg] = useState<string>();
     const [buttonLoading, setButtonLoading] = useState<number>();
@@ -39,7 +41,7 @@ const Video: React.FC<RouteComponentProps> = ({ history }) => {
         })
     }
 
-    const music = video!.music as IMusic;
+    const music = video?.music as IMusic;
 
     const byteToMega = (bytes: number = 0): string => {
         return Math.round(bytes / 1000000) + 'MB';

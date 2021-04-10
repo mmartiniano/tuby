@@ -14,6 +14,10 @@ http://localhost:5000/api/mount?l=https://www.youtube.com/watch?v=JtH68PJIQLE&r=
 
 http://localhost:5000/api/mount?l=https://www.youtube.com/watch?v=JtH68PJIQLE&r=a
 
+### mount music resource
+
+http://localhost:5000/api/mount?l=https://www.youtube.com/watch?v=JtH68PJIQLE&r=m
+
 ### download ticket resource
 
 http://localhost:5000/api/download?t=818e1cf9-b253-4a87-941d-bc066f645a85

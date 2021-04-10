@@ -6,7 +6,7 @@ from pytube.exceptions import PytubeError, RegexMatchError, VideoUnavailable
 from http import HTTPStatus
 from uuid import uuid4
 
-from util import data
+from util import data, convert
 from alias import Request, Resource
 
 
@@ -72,16 +72,25 @@ def mount():
 
         resource = request.args[Request.RESOURCE]
 
-        if resource == Resource.AUDIO:
-            stream = youtube_video.streams.get_audio_only()
-
-        elif resource == Resource.VIDEO:
-            stream = youtube_video.streams.first()
-
-        else:
+        if resource not in Resource._value2member_map_:
             return make_response('Bad resource type', HTTPStatus.BAD_REQUEST)
 
+        if resource == Resource.VIDEO:
+            stream = youtube_video.streams.first()
+             
+        else:
+            stream = youtube_video.streams.get_audio_only()
+
         stream.download(output_path = storage, filename = youtube_video.title)
+
+        if resource == Resource.MUSIC:
+            mp4 = os.path.join(storage, youtube_video.title + '.mp4')
+            mp3 = os.path.join(storage, youtube_video.title + '.mp3')
+
+            music = convert.mp4_to_mp3(mp4, mp3)
+
+            if not music:
+                return make_response('Failed to convert to music', HTTPStatus.INTERNAL_SERVER_ERROR)
 
         return make_response(id, HTTPStatus.CREATED)
 
