@@ -1,0 +1,1 @@
+wcwidth, parso, ipython-genutils, traitlets, pygments, prompt-toolkit, pickleshare, jedi, decorator, colorama, backcall, ipython, ipdb
