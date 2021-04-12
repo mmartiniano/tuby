@@ -22,7 +22,6 @@ const DownloadButton: React.FC<ButtonProps> = props => (
 const Video: React.FC<RouteComponentProps> = ({ history }) => {
     const context = useContext(Context);
     const video = context?.state.video || {};
-    console.log(video)
 
     if (Object.keys(video).length === 0) {
         history.push('/');
@@ -64,6 +63,8 @@ const Video: React.FC<RouteComponentProps> = ({ history }) => {
         }).then( () => {
             displayLoader(false);
             setButtonLoading(-1);
+
+            YouTubeService.delete();
         })
     }
 

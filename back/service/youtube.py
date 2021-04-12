@@ -1,4 +1,5 @@
 import os
+import eyed3
 from shutil import rmtree
 from flask import request, make_response, send_from_directory
 from pytube import YouTube
@@ -8,6 +9,7 @@ from uuid import uuid4
 
 from util import data, convert
 from alias import Request, Resource
+from error import MissingYouTubeLinkError, ResourceTypeError, ConvertionToMP3Error, TicketError
 
 
 STORAGE_DIRECTORY = 'storage'
@@ -67,13 +69,16 @@ def mount():
         os.makedirs(storage)
 
     try:
-        youtube_link = request.args[Request.LINK]
-        youtube_video = YouTube(youtube_link)
+        youtube_link = request.args.get(Request.LINK)
+        resource = request.args.get(Request.RESOURCE)
 
-        resource = request.args[Request.RESOURCE]
+        if not youtube_link:
+            raise MissingYouTubeLinkError    
 
         if resource not in Resource._value2member_map_:
-            return make_response('Bad resource type', HTTPStatus.BAD_REQUEST)
+            raise ResourceTypeError
+
+        youtube_video = YouTube(youtube_link)
 
         if resource == Resource.VIDEO:
             stream = youtube_video.streams.first()
@@ -90,28 +95,63 @@ def mount():
             music = convert.mp4_to_mp3(mp4, mp3)
 
             if not music:
-                return make_response('Failed to convert to music', HTTPStatus.INTERNAL_SERVER_ERROR)
+                raise ConvertionToMP3Error
+
+            metadata = youtube_video.metadata.metadata
+            tags = data.music(metadata)
+
+            music = eyed3.load(music)
+
+            music.tag.title = tags.get('song', youtube_video.title)
+            music.tag.artist = tags.get('artist')
+            music.tag.album = tags.get('album')
+
+            music.tag.save()
 
         return make_response(id, HTTPStatus.CREATED)
 
-    except (KeyError, PytubeError):
+    except (MissingYouTubeLinkError, PytubeError):
+        rmtree(storage)
         return make_response('Bad YouTube resource', HTTPStatus.BAD_REQUEST)
+
+    except ResourceTypeError:
+        rmtree(storage)
+        return make_response('Bad resource type', HTTPStatus.BAD_REQUEST)
+
+    except ConvertionToMP3Error:
+        rmtree(storage)
+        return make_response('Failed to convert to music', HTTPStatus.INTERNAL_SERVER_ERROR)
+
+    except:
+        rmtree(storage)
+        return make_response('Failed to mount required resource', HTTPStatus.INTERNAL_SERVER_ERROR)
 
 
 def download():
     """ Download YouTube resource to client """
 
-    ticket = request.args[Request.TICKET]
-    storage = os.path.join(STORAGE_DIRECTORY, ticket)
+    try:
+        ticket = request.args.get(Request.TICKET)
 
-    _, _, files = next(os.walk(storage))
+        if not ticket:
+            raise TicketError
 
-    if not len(files) > 0:
+        storage = os.path.join(STORAGE_DIRECTORY, ticket)
+
+        _, _, files = next(os.walk(storage))
+
+        if not len(files) > 0:
+            raise TicketError
+
+        response = send_from_directory(storage, files[0], as_attachment = True)
+        response.headers['x-suggested-filename'] = files[0]
+        return response
+
+    except TicketError:
         return make_response('Ticket not found or expired', HTTPStatus.NOT_FOUND)
 
-    response = send_from_directory(storage, files[0], as_attachment = True)
-    response.headers['x-suggested-filename'] = files[0]
-    return response
+    except:
+        return make_response('Failed to access ticket resource', HTTPStatus.INTERNAL_SERVER_ERROR)
 
 
 def delete():
@@ -121,7 +161,7 @@ def delete():
     storage = os.path.join(STORAGE_DIRECTORY, ticket)
 
     if not os.path.exists(storage):
-        make_response('Ticket not found', HTTPStatus.NOT_FOUND)
+        return make_response('Ticket not found', HTTPStatus.NOT_FOUND)
 
     rmtree(storage)
-    make_response({}, 200)
+    return make_response({}, HTTPStatus.OK)

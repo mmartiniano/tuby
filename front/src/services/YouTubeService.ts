@@ -3,6 +3,8 @@ import API from './API';
 
 
 export default class YouTubeService {
+    public static ticket: string
+
     public static search(link: string) : Promise<AxiosResponse> {
         return API.get("/info?l=" + link)
         .then(response => {
@@ -13,7 +15,12 @@ export default class YouTubeService {
     public static download(link: string, resource: string) : Promise<AxiosResponse> {
         return API.get(`/mount?l=${link}&r=${resource}`)
         .then(response => {
-            return API.get(`/download?t=${response.data}`, { responseType: 'blob' })
+            YouTubeService.ticket = response.data
+            return API.get(`/download?t=${YouTubeService.ticket}`, { responseType: 'blob' })
         })
+    }
+
+    public static delete(): void {
+        API.get(`/delete?t=${YouTubeService.ticket}`)
     }
 }
