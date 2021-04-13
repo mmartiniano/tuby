@@ -3,12 +3,13 @@ import { RouteComponentProps } from 'react-router-dom';
 
 import { IMusic} from '../../@types';
 import { ActionType, Context } from '../../context';
-import { Content, Left, Right, VideoTitle, VideoAuthor } from './styles';
+import { Content, Left, Right, VideoTitle, VideoAuthor, BackButton } from './styles';
 import Thumbnail from '../../components/Thumbnail';
 import Card from '../../components/Card';
 import Button, { ButtonProps } from '../../components/Button';
 import YouTubeService from '../../services/YouTubeService';
 import Error from '../../components/Error';
+import Icon from '../../components/Icon';
 
 
 const DownloadButton: React.FC<ButtonProps> = props => (
@@ -23,8 +24,12 @@ const Video: React.FC<RouteComponentProps> = ({ history }) => {
     const context = useContext(Context);
     const video = context?.state.video || {};
 
-    if (Object.keys(video).length === 0) {
+    const backToHomePage = () => {
         history.push('/');
+    }
+
+    if (Object.keys(video).length === 0) {
+        backToHomePage();
     }
 
     const [msg, setMsg] = useState<string>();
@@ -74,13 +79,16 @@ const Video: React.FC<RouteComponentProps> = ({ history }) => {
                 <Error>{msg}</Error>
             )}
             <Left>
+                <BackButton onClick={backToHomePage}>
+                    <Icon>arrow_back</Icon> Search for another video
+                </BackButton>
                 <Thumbnail alt="thumbnail" title="thumbnail" src={video!.thumbnail} />
                 <VideoTitle> {video!.title} </VideoTitle>
                 <VideoAuthor> {video!.author} </VideoAuthor>
             </Left>
             <Right>
                 <Card>
-                    <Card.Title> Video </Card.Title>
+                    <Card.Title> <Icon>videocam</Icon> Video </Card.Title>
                     <p><strong>Resolution: </strong>{video?.streams?.complete.resolution}</p>
                     <DownloadButton
                         onClick={() => handleClick('v', 0)}
@@ -91,7 +99,7 @@ const Video: React.FC<RouteComponentProps> = ({ history }) => {
                 </Card>
                 {music.song && (
                     <Card>
-                        <Card.Title> Music </Card.Title>
+                        <Card.Title> <Icon>audiotrack</Icon> Music </Card.Title>
                         <p><strong>Song: </strong>{music.song}</p>
                         <p><strong>Artist: </strong>{music.artist || ''}</p>
                         <p><strong>Album: </strong>{music.album}</p>
@@ -105,7 +113,7 @@ const Video: React.FC<RouteComponentProps> = ({ history }) => {
                     </Card>
                 )}
                 <Card>
-                    <Card.Title> Audio </Card.Title>
+                    <Card.Title> <Icon>volume_down</Icon> Audio </Card.Title>
                     <p><strong>Resolution: </strong>{video?.streams?.audio.resolution}</p>
                     <DownloadButton
                         onClick={() => handleClick('a', 2)}

@@ -25,10 +25,14 @@ def info():
     """ Get YouTube video info """
 
     try:
-        youtube_link = request.args[Request.LINK]
+        youtube_link = request.args.get(Request.LINK)
+
+        if not youtube_link:
+            raise MissingYouTubeLinkError
+
         youtube_video = YouTube(youtube_link)
 
-    except KeyError:
+    except MissingYouTubeLinkError:
         return make_response('Missing YouTube link', HTTPStatus.BAD_REQUEST)
     
     except RegexMatchError:
@@ -157,11 +161,18 @@ def download():
 def delete():
     """ Delete resource from server """
 
-    ticket = request.args[Request.TICKET]
-    storage = os.path.join(STORAGE_DIRECTORY, ticket)
+    try: 
+        ticket = request.args.get(Request.TICKET, '')
+        storage = os.path.join(STORAGE_DIRECTORY, ticket)
 
-    if not os.path.exists(storage):
+        if not ticket or not os.path.exists(storage):
+            raise TicketError
+
+        rmtree(storage)
+        return make_response({}, HTTPStatus.OK)
+
+    except (TicketError):
         return make_response('Ticket not found', HTTPStatus.NOT_FOUND)
 
-    rmtree(storage)
-    return make_response({}, HTTPStatus.OK)
+    except:
+        return make_response('Failed to delete ticket resource', HTTPStatus.INTERNAL_SERVER_ERROR)

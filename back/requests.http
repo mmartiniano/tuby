@@ -21,3 +21,7 @@ http://localhost:5000/api/mount?l=https://www.youtube.com/watch?v=JtH68PJIQLE&r=
 ### download ticket resource
 
 http://localhost:5000/api/download?t=818e1cf9-b253-4a87-941d-bc066f645a85
+
+### delete ticket resource
+
+http://localhost:5000/api/delete?t=45f25b9c-84-4b1e-8483-7d3367acf937

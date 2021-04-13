@@ -19,6 +19,14 @@ export const Content = styled.div`
     }
 `;
 
+export const BackButton = styled.div`
+    display: flex;
+    align-items: center;
+    font-size: 1.1rem;
+    margin-bottom: 1.2rem;
+    cursor: pointer;
+`;
+
 export const VideoTitle = styled.h2`
     margin-top: 0.5rem;
     font-size: 1.2rem;
@@ -30,7 +38,7 @@ export const VideoAuthor = styled.p`
 `;
 
 export const Left = styled.div`
-    margin-top: 3.5rem;
+    margin-top: 1.2rem;
 
     @media only screen and (min-width: 992px) {
         & {
