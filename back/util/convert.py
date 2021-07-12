@@ -11,7 +11,7 @@ def mp4_to_mp3(mp4, mp3) :
 
             os.remove(mp4)
 
-        except (OSError, ValueError) :
+        except:
             return None
 
         return mp3

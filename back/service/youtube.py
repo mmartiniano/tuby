@@ -86,32 +86,32 @@ def mount():
 
         if resource == Resource.VIDEO:
             stream = youtube_video.streams.first()
+            stream.download(output_path = storage, filename = youtube_video.title)
              
         else:
             stream = youtube_video.streams.get_audio_only()
+            mp4 = stream.download(output_path = storage, filename = youtube_video.title)
+            
+            mp3 = mp4[:-4] + '.mp3'
 
-        stream.download(output_path = storage, filename = youtube_video.title)
+            audio = convert.mp4_to_mp3(mp4, mp3)
 
-        if resource == Resource.MUSIC:
-            mp4 = os.path.join(storage, youtube_video.title + '.mp4')
-            mp3 = os.path.join(storage, youtube_video.title + '.mp3')
-
-            music = convert.mp4_to_mp3(mp4, mp3)
-
-            if not music:
+            if not audio:
                 raise ConvertionToMP3Error
 
-            metadata = youtube_video.metadata.metadata
-            tags = data.music(metadata)
+            if resource == Resource.MUSIC:
 
-            music = eyed3.load(music)
+                metadata = youtube_video.metadata.metadata
+                tags = data.music(metadata)
 
-            music.tag.title = tags.get('song', youtube_video.title)
-            music.tag.artist = tags.get('artist')
-            music.tag.album = tags.get('album')
+                music = eyed3.load(audio)
 
-            music.tag.save()
+                music.tag.title = tags.get('song', youtube_video.title)
+                music.tag.artist = tags.get('artist')
+                music.tag.album = tags.get('album')
 
+                music.tag.save(version=eyed3.id3.ID3_DEFAULT_VERSION, encoding = 'utf-8')
+            
         return make_response(id, HTTPStatus.CREATED)
 
     except (MissingYouTubeLinkError, PytubeError):
@@ -147,8 +147,10 @@ def download():
         if not len(files) > 0:
             raise TicketError
 
-        response = send_from_directory(storage, files[0], as_attachment = True)
-        response.headers['x-suggested-filename'] = files[0]
+        filename = files[0]
+        response = send_from_directory(storage, filename, as_attachment = True)
+        response.headers['x-suggested-filename'] = filename.encode('latin-1', 'ignore')
+
         return response
 
     except TicketError:
