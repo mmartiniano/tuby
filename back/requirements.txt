@@ -1,0 +1,5 @@
+Flask==2.0.1
+python-dotenv==0.15.0
+pytube==10.9.2
+moviepy==1.0.3
+eyed3==0.9.6
